@@ -178,7 +178,17 @@ function uploadProject(payload, onProgress) {
 }
 
 export default function App() {
-  const [language, setLanguage] = useState("he");
+  // Load the previously selected language.
+  const [language, setLanguage] = useState(() => {
+    try {
+      const savedLanguage = localStorage.getItem("projectLanguage");
+
+      return savedLanguage === "en" ? "en" : "he";
+    } catch {
+      return "he";
+    }
+  });
+
   const t = translations[language];
   const isHebrew = language === "he";
 
@@ -200,6 +210,16 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Save the selected language.
+  useEffect(() => {
+    try {
+      localStorage.setItem("projectLanguage", language);
+    } catch (error) {
+      console.error("Could not save language:", error);
+    }
+  }, [language]);
+
+  // Save the form draft.
   useEffect(() => {
     try {
       localStorage.setItem("projectDraft", JSON.stringify(form));
@@ -423,7 +443,7 @@ export default function App() {
 
                 {errors.architectName && (
                   <small className="field-error">
-                    {errors.architectName}
+                    {errors.architectError}
                   </small>
                 )}
               </div>
